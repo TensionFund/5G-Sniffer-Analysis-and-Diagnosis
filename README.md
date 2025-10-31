@@ -1,6 +1,5 @@
 # 5G PRACH Detection & Sniffer Analysis
-**Author:** Zain (sxh1655)  
-**Repository:** University of Birmingham — Final Year MSc Project (Dissertation)
+**Author:** Zain
 
 ## Project overview
 This project implements a diagnostic analysis pipeline for 5G PRACH (Physical Random Access Channel) detection. It integrates:
