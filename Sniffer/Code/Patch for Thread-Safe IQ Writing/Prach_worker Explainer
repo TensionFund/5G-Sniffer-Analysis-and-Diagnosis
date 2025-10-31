@@ -1,0 +1,76 @@
+To capture the raw PRACH I/Q samples, the NR-Scope software is modified. The changes involve introducing a new file writer component and altering the existing prach_worker to pass the I/Q data to this new component for persistent storage.
+C++ Pseudo-Patch for Thread-Safe I/Q Writing
+
+The following C++ pseudo-patch illustrates the required modifications. A new class, IQWriter, is created to manage file I/O in a dedicated thread, which is fed by a thread-safe queue. The existing prach_worker is adapted to act as a producer for this queue, ensuring that the real-time signal processing is not blocked by file write operations.
+
+    New File: /nrscope/src/utils/iq_writer.h: This header file defines the IQPacket structure and the IQWriter class interface, utilizing standard C++11 concurrency primitives for thread-safe operation [16].
+
+C++
+
+    #include <queue>
+    #include <mutex>
+    #include <condition_variable>
+    #include <thread>
+    #include <fstream>
+    #include <memory>
+    #include <vector>
+    #include <complex>
+
+    // Structure to hold a block of I/Q samples and its timestamp
+    struct IQPacket {
+        uint64_t timestamp;
+        std::vector<std::complex<float>> samples;
+
+        IQPacket(uint64_t ts, const std::complex<float>* data, size_t size)
+            : timestamp(ts), samples(data, data + size) {}
+    };
+
+    // Thread-safe writer class
+    class IQWriter {
+    public:
+        IQWriter(const std::string& filename);
+        ~IQWriter();
+        void enqueue(std::shared_ptr<IQPacket> packet);
+
+    private:
+        void writer_thread_func();
+
+        std::ofstream file_stream_;
+        std::queue<std::shared_ptr<IQPacket>> packet_queue_;
+        std::mutex mutex_;
+        std::condition_variable cv_;
+        std::thread writer_thread_;
+        bool stop_thread_ = false;
+    };
+
+    The implementation in iq_writer.cc contains the logic for the writer thread, which waits on a condition variable until the queue is populated, dequeues a packet, and writes its contents to a binary file.
+
+    Modification in: /nrscope/src/workers/prach_worker.cc: The prach_worker is modified to instantiate and push captured samples to the IQWriter's queue.
+
+C++
+
+    // ... existing includes ...
+    #include "iq_writer.h" // Include the new header
+
+    // Assume iq_writer_instance is a globally accessible singleton
+    extern IQWriter iq_writer_instance;
+
+    void prach_worker::prach_work(slot_data* slot) {
+        // ... existing PRACH detection and processing logic ...
+
+        // --- START MODIFICATION ---
+        // After identifying a PRACH occasion and extracting relevant samples
+        if (is_prach_occasion && !prach_samples.empty()) {
+            // Create a shared pointer to a new IQPacket
+            auto iq_packet = std::make_shared<IQPacket>(
+                slot->timestamp,
+                prach_samples.data(),
+                prach_samples.size()
+            );
+            // Enqueue the packet for the writer thread (non-blocking call)
+            iq_writer_instance.enqueue(iq_packet);
+        }
+        // --- END MODIFICATION ---
+
+        // ... rest of the worker function ...
+    }
