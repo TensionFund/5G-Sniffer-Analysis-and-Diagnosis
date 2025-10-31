@@ -1,0 +1,52 @@
+I. GNB IMPLEMENTATION WITH SRSRAN PROJECT
+
+The foundation of the testbed is a 5G gNB compiled and run using the srsRAN Project software suite. This section details the build process, configuration, and execution of the gNB application.
+
+A. Build Process
+
+The srsRAN Project is built from the source code using CMake. The following steps are performed to compile the software:
+
+Clone the official srsRAN Project repository:
+
+Bash
+    
+    git clone https://github.com/srsRAN/srsRAN_Project.git
+
+Create a build directory and compile the source code using the make utility. The -j$(nproc) flag is used to parallelize the compilation across all available processor cores.
+
+Bash
+
+    cd srsRAN_Project
+    mkdir build
+    cd build
+    cmake ../
+    make -j$(nproc)
+
+This process generates the gNB application binary, which is located at srsRAN_Project/build/apps/gnb/ [5].
+
+B. YAML Configuration
+
+The gNB is configured via a YAML file. For this implementation, an example configuration file, gnb_usrp_n78_00101.yaml, is adapted. TABLE I outlines the critical parameters that must be set for proper operation and interoperability with the 5G Core (5GC) and the data capture system.
+
+<br>
+<div align="center">
+TABLE I <br>
+GNB CONFIGURATION PARAMETERS
+</div>
+Parameter Path	Example Value	Description & Rationale
+amf.addr	127.0.0.1	IP address of the Access and Mobility Management Function (AMF). Set to localhost if the 5GC is on the same machine [10].
+ru_sdr.device_args	type=b200,clock=external	Arguments for the UHD driver. type=b200 is for the USRP B210. clock=external is mandatory for synchronization via a 10 MHz reference [10].
+ru_sdr.srate	23.04	RF sample rate in MHz, a base rate derived from 3GPP numerology.
+cell_cfg.dl_arfcn	632628	Downlink Absolute Radio-Frequency Channel Number, defining the cell’s center frequency [10].
+cell_cfg.band	78	NR operating band. Band 78 (n78) is a common TDD band for private 5G testing [12].
+prach.prach_ConfigurationIndex	160	Defines preamble format and time/frequency resources for PRACH occasions per 3GPP TS 38.211 [13].
+
+<br>
+
+C. Execution Command
+
+The gNB application requires root privileges to enable real-time thread scheduling for deterministic performance. From the build directory (srsRAN_Project/build/apps/gnb/), the gNB is executed as follows:
+
+Bash
+    
+    sudo ./gnb -c gnb_usrp_n78_00101.yaml

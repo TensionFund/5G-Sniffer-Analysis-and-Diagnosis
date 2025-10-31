@@ -1,0 +1,61 @@
+# This example configuration outlines how to configure the srsRAN Project gNB to create a single TDD cell
+# transmitting in band 78, with 20 MHz bandwidth and 30 kHz sub-carrier-spacing. A USRP B200 is configured 
+# as the RF frontend using split 8. Note in this example an external clock source is not used, so the sync 
+# is not defined and the default is used. 
+
+# 5G bands 	1, 2, 3, 5, 7, 8, 12, 14, 20, 25, 28, 30, 38, 40, 41, 48, 66, 71, 77, 78, 257, 258, 260, 261 SA/NSA/Sub6/mmWave - G9S9B
+# https://www.gsmarena.com/google_pixel_6-11037.php
+
+# amf:
+#   addr: 172.18.0.10                  # The address or hostname of the AMF.
+#   bind_addr: 172.18.0.1             # A local IP that the gNB binds to for traffic from the AMF.
+
+cu_cp:
+  amf:
+    addr: 172.18.0.10
+    # port: 38412
+    bind_addr: 172.18.0.1
+    supported_tracking_areas:
+      - tac: 1  
+        plmn_list:
+          - plmn: "00101"
+            tai_slice_support_list:
+              - sst: 1
+
+ru_sdr:
+  device_driver: uhd                                              # The RF driver name.
+  device_args: type=b200,master_clock_rate=23040000,clock=external,sync=external,num_recv_frames=64,num_send_frames=64    #,series=30BC413    # Optionally pass arguments to the selected RF driver.
+  srate: 23.04                                                    # RF sample rate might need to be adjusted according to selected bandwidth.
+  otw_format: sc12  
+  clock: external                        # Optional TEXT (default). Specify the RF device clock source (i.e., 10MHz reference oscillator). Supported: [default, internal, external, gpsdo].
+  sync: external                         # Optional TEXT (default). Specify the RF device time synchronization source (i.e., 1PPS reference). Supported: [default, internal, external, gpsdo].
+  tx_gain: 70                                                     # Transmit gain of the RF might need to adjusted to the given situation.
+#  tx_gain: 80
+  rx_gain: 45                                                     # Receive gain of the RF might need to adjusted to the given situation.
+
+cell_cfg:
+  dl_arfcn: 642544                                                # ARFCN of the downlink carrier (center frequency).
+  band: 78                                                        # The NR band.
+  channel_bandwidth_MHz: 20                                       # Bandwith in MHz. Number of PRBs will be automatically derived.
+  # channel_bandwidth_MHz: 50
+  common_scs: 30                                                  # Subcarrier spacing in kHz used for data.
+  plmn: "00101"                                                   # PLMN broadcasted by the gNB.
+  tac: 1                                                          # Tracking area code (needs to match the core configuration).
+  pci: 1                                                          # Physical cell ID.
+
+  prach:
+    prach_config_index: 160
+
+log:
+  filename: /home/uob/work/log/gnb.log                                          # Path of the log file.
+  all_level: info                                                 # Logging level applied to all layers. 
+  # mac_level: info
+  phy_rx_symbols_filename: /home/uob/work/log/phy_rx_symbols             # Optional TEXT. Print received symbols to file. Symbols will be printed if a valid path is set. Format: file path. This file can be used in the srsRAN_matlab project.
+  phy_rx_symbols_port: 0                # Optional TEXT. Set to a valid receive port number to dump the IQ symbols from that port only, or set to "all" to dump the IQ symbols from all UL receive ports. Only works if "phy_rx_symbols_filename" is set. Supported: [NON-NEGATIVE or all].
+  phy_rx_symbols_prach: true           # Optional BOOLEAN (false). Set to true to dump the IQ symbols from all the PRACH ports. Only works if "phy_rx_symbols_filename" is set. Supported: [false, true].
+  
+pcap:
+  mac_enable: true                                               # Set to true to enable MAC-layer PCAPs.
+  mac_filename: /home/uob/work/log/gnb_mac.pcap                                 # Path where the MAC PCAP is stored.
+  ngap_enable: false                                              # Set to true to enable NGAP PCAPs.
+  ngap_filename: /home/uob/work/log/gnb_ngap.pcap                               # Path where the NGAP PCAP is stored.
