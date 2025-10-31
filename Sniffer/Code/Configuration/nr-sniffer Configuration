@@ -1,0 +1,15 @@
+The NR-Scope config.yaml must be configured to match the gNB’s RF parameters and to specify the output file for the I/Q data, as shown in TABLE II.
+
+<br>
+<div align="center">
+TABLE II <br>
+NR-SCOPE CONFIGURATION PARAMETERS
+</div>
+Parameter Path	Example Value	Description & Rationale
+rf_args	type=b200,clock=external	UHD arguments. Must match the gNB setup for synchronization [18].
+center_freq_hz	3489420000	Center frequency (Hz). Must correspond to the dl_arfcn in the gNB config.
+srate_hz	23040000	Sample rate (Hz). Must match the srate parameter in the gNB config.
+iq_capture.filepath	/tmp/prach_iq.bin	New parameter specifying the destination file for captured I/Q samples.
+
+<br>
+

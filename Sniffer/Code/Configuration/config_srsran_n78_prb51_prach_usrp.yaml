@@ -1,0 +1,62 @@
+nof_usrp_dev: 1
+usrp_setting_0:
+  ssb_freq: 3633600000 # Set to the ssb frequency of the cell, could be obtained with the cell scan function
+  freq_offset_ssb_fc: 0
+
+  device_name: "UHD"
+    rf_args: "clock=external,sync=external,type=b200,master_clock_rate=23040000"
+  # rx_files: ["/signal_records/srsran/srsran_n78_pixel6_prb51_clear_ra/synced.sfn280.pixel6.n78.srsgnb.fc36.336.sr46.08_20250608_230540.fc32"]
+  # tx_files: ["/dev/null"] # won't be read in the sniffer case
+
+  rx_gain: 45 # for x310 CBX, max rx gain is 31.5, for b210, it's around 80, for x310 TwinRX, max rx gain is 90
+  min_rx_gain: 45
+  max_rx_gain: 45
+  srate_hz: 23040000 # the sampling rate of USRP, integer division of 200MHz for TwinRX, and 5G sampling rate for CBX: 11520000 or 23040000
+  srsran_srate_hz: 23040000 # the sampling for real signal processing, should be in 5G sampling rate, multiple of 1.92 MHz. 
+  nof_carriers: 1 # srsRAN rf setting, always set to be 1 for now.
+  nof_antennas: 1 # srsRAN rf setting, always set to be 1 for now.
+  scs_index: 1 #(0: 15kHz, 1: 30kHz, ..., the u in standard)
+  rf_log_level: "debug"
+  nof_rnti_worker_groups: 10 # number of of threads for DCI decoding, each will divide the UEs into small groups
+  nof_bwps: 1 # number of BWP of the cell
+  nof_workers: 6 # using worker pool to asynchronously process the slot data
+  cpu_affinity: true # pin the worker's thread into CPU or not.
+
+  # For debug use
+  debug_end_sfn: 9999
+  search_sib1: true
+
+  search_msg1: true
+  target_msg1_sfn: 290
+  target_msg1_subframe_idx: 9
+  target_msg1_slot_idx: 19
+  export_msg1_frame: false
+  prach_scan: true
+
+  prach_context:
+    ports: [0]
+    slot:
+      frame: 1
+      slot: 19
+    sector: 0
+    start_symbol: 2
+    format: B4
+    rb_offset: 11
+    nof_td_occasions: 1
+    nof_fd_occasions: 1
+    nof_prb_ul_grid: 51
+    pusch_scs: 1
+    root_sequence_index: 1
+    restricted_set: UNRESTRICTED
+    zero_correlation_zone: 0
+    start_preamble_index: 0
+    nof_preamble_indices: 64
+
+  log_name: "/workspaces/nr_sniffer/config_nrscope/a.csv"
+  google_dataset_id: "ngscope5g_dci_log_wanhr"
+
+log_config:
+  local_log: true
+  push_to_google: false
+  google_service_account_credential: "/home/wanhr/Downloads/nsf-2223556-222187-02b924918c95.json"
+
