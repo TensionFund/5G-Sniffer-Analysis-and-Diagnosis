@@ -1,0 +1,14 @@
+Since the log files are too large in size. They are contained in a different storage space.
+The link for the log files is as follows, 
+    
+                                https://mega.nz/folder/SU8SjLjI#l2cK3bOrU5AQtJGM6tWiZQ
+
+This folder, "Logs" contains logs of three rounds of sniffer test and a folder, "ZIP File" containing the first two logs in compressed format.
+Below is the file layout:
+--Sniffer
+  |--Code
+  |--Logs
+     |--1st Sniffer File
+     |--2nd Sniffer File
+     |--3rd Sniffer File
+     |--ZIP File
