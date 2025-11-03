@@ -1,0 +1,1 @@
+This folder contains the visualization of the logs in consideration.
